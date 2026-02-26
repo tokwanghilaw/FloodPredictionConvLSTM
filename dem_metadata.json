@@ -1,0 +1,53 @@
+{
+  "original_file": "BUHI_DTM.tif",
+  "processed_shape": [
+    666,
+    726
+  ],
+  "downsample_factor": 4,
+  "dem_crs": "ESRI:102457",
+  "study_bounds_wgs84": {
+    "min_lon": 123.4,
+    "max_lon": 123.6,
+    "min_lat": 13.38,
+    "max_lat": 13.5
+  },
+  "clip_bounds_native": {
+    "left": 548978.6866,
+    "right": 563503.6866,
+    "bottom": 1479253.8118216854,
+    "top": 1492568.5009715597
+  },
+  "transform": [
+    20.0,
+    0.0,
+    548978.6866,
+    0.0,
+    -20.0,
+    1492568.5009715597
+  ],
+  "display_extent": [
+    123.45373508762475,
+    123.58816838346078,
+    13.379910825252205,
+    13.500027702782212
+  ],
+  "statistics": {
+    "min": 48.910579681396484,
+    "max": 1209.3150634765625,
+    "mean": 263.1612243652344,
+    "std": 198.8705291748047
+  },
+  "lake": {
+    "shapefile": "BUHI_LAKE.shp",
+    "pixels": 45515,
+    "surface_elev": 80.5999984741211,
+    "bank_elev": 81.00784301757812
+  },
+  "station_pixels": {
+    "Buhi": {
+      "row": 367,
+      "col": 298
+    }
+  }
+}

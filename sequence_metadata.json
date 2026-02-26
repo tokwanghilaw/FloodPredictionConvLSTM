@@ -1,0 +1,27 @@
+{
+  "input_hours": 12,
+  "output_hours": 6,
+  "stride": 6,
+  "n_train": 1199,
+  "n_test": 300,
+  "grid_height": 128,
+  "grid_width": 128,
+  "input_shape": [
+    12,
+    128,
+    128,
+    4
+  ],
+  "output_shape": [
+    6,
+    128,
+    128,
+    1
+  ],
+  "channels": [
+    "rainfall",
+    "lake_level",
+    "dtm",
+    "lake_mask"
+  ]
+}

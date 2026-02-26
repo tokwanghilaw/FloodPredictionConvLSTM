@@ -1,0 +1,22 @@
+{
+  "rainfall": {
+    "min": 0.0,
+    "max": 78.0
+  },
+  "riverlevel": {
+    "min": 0.0,
+    "max": 3.15
+  },
+  "thresholds": {
+    "normal": 0.0,
+    "alert": 0.75,
+    "alarm": 0.8,
+    "critical": 0.85
+  },
+  "thresholds_normalized": {
+    "normal": 0.0,
+    "alert": 0.2380952380952381,
+    "alarm": 0.253968253968254,
+    "critical": 0.2698412698412698
+  }
+}
