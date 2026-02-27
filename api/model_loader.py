@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model as keras_load_model   # <-- THIS LINE IS THE FIX
 
 def load_config(metadata_dir: Path):
     """Load normalization, DEM, and sequence metadata."""
@@ -25,6 +25,6 @@ def load_model(model_path: Path, metadata_dir: Path):
         raise FileNotFoundError(f"Model file not found: {model_path}")
     
     print(f"Loading model from {model_path}...")
-    model = load_model(model_path)
+    model = keras_load_model(model_path)   # <-- FIXED: uses TensorFlow version
     print("Model loaded successfully!")
     return model
