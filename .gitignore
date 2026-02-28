@@ -1,0 +1,25 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Large data files (CSV, weights, models)
+*.csv
+*.h5
+*.keras
+*.pt
+*.pth
+
+# OS generated files
+.DS_Store
+Thumbs.db
