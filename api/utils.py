@@ -5,13 +5,13 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 def flood_depth_to_base64_png(depth_map: np.ndarray, max_depth: float = None) -> str:
-    """Convert flood depth to colorful base64 PNG (transparent where no flood)."""
+    """Convert flood depth to colorful base64 PNG."""
     if max_depth is None or max_depth == 0:
         max_depth = np.max(depth_map) + 1e-6 if np.max(depth_map) > 0 else 1.0
     
     norm = np.clip(depth_map / max_depth, 0, 1)
     rgba = (plt.cm.plasma(norm) * 255).astype(np.uint8)
-    rgba[..., 3] = (norm > 0.005).astype(np.uint8) * 220   # semi-transparent
+    rgba[..., 3] = (norm > 0.005).astype(np.uint8) * 220
     
     img = Image.fromarray(rgba)
     buf = io.BytesIO()
@@ -22,7 +22,7 @@ def flood_depth_to_base64_png(depth_map: np.ndarray, max_depth: float = None) ->
 def flood_extent_to_base64_png(extent_map: np.ndarray) -> str:
     """Red outline for flood extent."""
     rgba = np.zeros((*extent_map.shape, 4), dtype=np.uint8)
-    rgba[extent_map > 0.5] = [220, 20, 60, 160]   # Crimson
+    rgba[extent_map > 0.5] = [220, 20, 60, 160]
     img = Image.fromarray(rgba)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
@@ -30,8 +30,10 @@ def flood_extent_to_base64_png(extent_map: np.ndarray) -> str:
 
 
 def dem_to_base64_png(dem: np.ndarray) -> str:
-    """Terrain background."""
-    norm = (dem - dem.min()) / (dem.ptp() + 1e-8)
+    """Terrain background — FIXED for NumPy 2.0+"""
+    dem_min = dem.min()
+    dem_ptp = np.ptp(dem)          # ← THIS IS THE FIX (was dem.ptp())
+    norm = (dem - dem_min) / (dem_ptp + 1e-8)
     rgba = (plt.cm.terrain(norm) * 255).astype(np.uint8)
     img = Image.fromarray(rgba)
     buf = io.BytesIO()
@@ -42,7 +44,7 @@ def dem_to_base64_png(dem: np.ndarray) -> str:
 def lake_mask_to_base64_png(lake_mask: np.ndarray) -> str:
     """Blue lake mask."""
     rgba = np.zeros((*lake_mask.shape, 4), dtype=np.uint8)
-    rgba[lake_mask > 0.5] = [30, 144, 255, 140]   # Dodger blue
+    rgba[lake_mask > 0.5] = [30, 144, 255, 140]
     img = Image.fromarray(rgba)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
