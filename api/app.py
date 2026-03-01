@@ -62,22 +62,23 @@ async def lifespan(app: FastAPI):
     dem = np.load(BASE_DIR / "dem_small.npy")
     dem_norm = np.load(BASE_DIR / "dem_small_norm.npy")
     lake_mask_raw = np.load(BASE_DIR / "lake_small.npy")
-    lake_mask = clean_lake_mask(lake_mask_raw)
+    lake_mask_clean = clean_lake_mask(lake_mask_raw)  # for flood estimation
 
     _state["model"] = model
     _state["cfg"] = cfg
     _state["dem"] = dem
     _state["dem_norm"] = dem_norm
-    _state["lake_mask"] = lake_mask
+    _state["lake_mask_raw"] = lake_mask_raw       # raw — used as model input ch.3
+    _state["lake_mask_clean"] = lake_mask_clean   # cleaned — used for flood estimation
 
-    # Pre‑render static images (never changes)
+    # Pre-render static images (never changes)
     _state["dem_png"] = dem_to_base64_png(dem)
-    _state["lake_png"] = lake_mask_to_base64_png(lake_mask)
+    _state["lake_png"] = lake_mask_to_base64_png(lake_mask_clean)
     _state["bounds"] = get_image_bounds(cfg["dem_metadata"])
 
     print(f"  Model loaded from {MODEL_PATH}")
     print(f"  DEM shape: {dem.shape}")
-    print(f"  Lake mask pixels: {int(lake_mask.sum())}")
+    print(f"  Lake mask pixels (clean): {int(lake_mask_clean.sum())}")
     print("Ready to serve requests!")
 
     yield  # ← app is running
@@ -178,7 +179,7 @@ async def health():
         status="ok",
         model_loaded="model" in _state,
         dem_shape=list(_state["dem"].shape) if "dem" in _state else [],
-        lake_pixels=int(_state["lake_mask"].sum()) if "lake_mask" in _state else 0,
+        lake_pixels=int(_state["lake_mask_clean"].sum()) if "lake_mask_clean" in _state else 0,
     )
 
 
@@ -197,7 +198,8 @@ async def predict(req: ForecastRequest):
     cfg = _state["cfg"]
     dem = _state["dem"]
     dem_norm = _state["dem_norm"]
-    lake_mask = _state["lake_mask"]
+    lake_mask_raw = _state["lake_mask_raw"]       # raw - for model input
+    lake_mask_clean = _state["lake_mask_clean"]   # cleaned - for flood estimation
 
     norm = cfg["norm_params"]
     dem_meta = cfg["dem_metadata"]
@@ -214,7 +216,7 @@ async def predict(req: ForecastRequest):
     h = seq_meta["input_shape"][1]
     w = seq_meta["input_shape"][2]
 
-    # ── Normalise inputs ────────────────────────────────────────────────
+    # -- Normalise inputs -------------------------------------------------
     rain_range = rain_max - rain_min if rain_max > rain_min else 1.0
     river_range = river_max - river_min if river_max > river_min else 1.0
 
@@ -226,32 +228,39 @@ async def predict(req: ForecastRequest):
         [(r - river_min) / river_range for r in req.lake_level], 0, 1
     ).astype(np.float32)
 
-    # ── Build spatial input tensor (1, 12, H, W, 4) ────────────────────
+    # -- Build spatial input tensor (1, 12, H, W, 4) ---------------------
+    # Channel 3 = raw lake_mask (must match training data)
     inp = np.zeros((1, 12, h, w, 4), dtype=np.float32)
     for t in range(12):
         inp[0, t, :, :, 0] = rainfall_n[t]
         inp[0, t, :, :, 1] = river_n[t]
         inp[0, t, :, :, 2] = dem_norm
-        inp[0, t, :, :, 3] = lake_mask
+        inp[0, t, :, :, 3] = lake_mask_raw
 
-    # ── Run model ───────────────────────────────────────────────────────
+    # -- Run model --------------------------------------------------------
     pred = model.predict(inp, verbose=0)  # (1, 6, H, W, 1)
 
     denorm = lambda v: float(v) * (river_max - river_min) + river_min
 
-    # ── Process each forecast hour ──────────────────────────────────────
+    # -- Scenario levels: last 6 input hours drive the flood maps ---------
+    # (Same approach as the notebook: model prediction is informational,
+    #  flood maps use the INPUT scenario levels for accurate what-if viz.)
+    scenario_levels = req.lake_level[6:12]   # hours 7-12 -> forecast +1h-+6h
+
+    # -- Process each forecast hour ---------------------------------------
     hourly: list[HourlyResult] = []
     global_max_depth = 0.0
 
     # First pass: compute all flood results to find global max depth
     flood_results = []
     for hr in range(6):
-        pred_m = denorm(pred[0, hr, 0, 0, 0])
-        level_name, level_color = get_warning_level(pred_m, thresholds)
+        model_pred_m = denorm(pred[0, hr, 0, 0, 0])  # model prediction (informational)
+        scene_lev = scenario_levels[hr]                # scenario level (used for flood)
+        level_name, level_color = get_warning_level(scene_lev, thresholds)
         fext, fdep, stats = estimate_flood(
-            pred_m, dem, lake_mask, lake_bank_elev, overflow_threshold
+            scene_lev, dem, lake_mask_clean, lake_bank_elev, overflow_threshold
         )
-        flood_results.append((pred_m, level_name, level_color, fext, fdep, stats))
+        flood_results.append((model_pred_m, scene_lev, level_name, level_color, fext, fdep, stats))
         if stats["max_depth"] > global_max_depth:
             global_max_depth = stats["max_depth"]
 
@@ -259,13 +268,13 @@ async def predict(req: ForecastRequest):
         global_max_depth = 1.0  # avoid division by zero
 
     # Second pass: generate images with consistent colour scale
-    for hr, (pred_m, level_name, level_color, fext, fdep, stats) in enumerate(flood_results):
+    for hr, (model_pred_m, scene_lev, level_name, level_color, fext, fdep, stats) in enumerate(flood_results):
         depth_png = flood_depth_to_base64_png(fdep, global_max_depth)
         extent_png = flood_extent_to_base64_png(fext)
 
         hourly.append(HourlyResult(
             hour=hr + 1,
-            predicted_level_m=round(pred_m, 4),
+            predicted_level_m=round(scene_lev, 4),
             warning_level=level_name,
             warning_color=level_color,
             overflowing=stats["overflowing"],
