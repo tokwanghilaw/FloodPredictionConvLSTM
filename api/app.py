@@ -14,14 +14,14 @@ Run:
 Then open  http://localhost:8000/docs  for the interactive Swagger UI.
 """
 
+from __future__ import annotations
+
 import os
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from __future__ import annotations
-
-import numpy as np
 from pathlib import Path
 from contextlib import asynccontextmanager
 

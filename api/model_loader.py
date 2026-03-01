@@ -1,5 +1,10 @@
+import os
+# Ensure this matches app.py so both files use the same Keras backend
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
 import json
 from pathlib import Path
+import tensorflow as tf
 from tensorflow.keras.utils import register_keras_serializable
 from tensorflow.keras.models import load_model as keras_load_model
 
