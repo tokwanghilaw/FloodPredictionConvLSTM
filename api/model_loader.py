@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
-from keras.utils import register_keras_serializable
-from keras.models import load_model as keras_load_model
+from tensorflow.keras.utils import register_keras_serializable
+from tensorflow.keras.models import load_model as keras_load_model
 
 @register_keras_serializable()
 def extract_forecast(x):
