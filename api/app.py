@@ -39,6 +39,21 @@ from api.utils import (
     get_image_bounds,
 )
 
+import tensorflow as tf
+# Limit TensorFlow to use less memory
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    try:
+        tf.config.set_logical_device_configuration(
+            gpus[0],
+            [tf.config.LogicalDeviceConfiguration(memory_limit=1024)])  # limit to ~1GB
+    except RuntimeError as e:
+        print(e)
+else:
+    # For CPU-only (Render free is CPU)
+    tf.config.threading.set_intra_op_parallelism_threads(1)
+    tf.config.threading.set_inter_op_parallelism_threads(1)
+
 # ---------------------------------------------------------------------------
 # Paths — all .npy / .json / .keras files live in the parent folder
 # ---------------------------------------------------------------------------
