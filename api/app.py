@@ -29,6 +29,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from supabase import create_client, Client
+
 from api.model_loader import load_model, load_config
 from api.flood import clean_lake_mask, estimate_flood, get_warning_level
 from api.utils import (
@@ -53,6 +55,14 @@ else:
     # For CPU-only (Render free is CPU)
     tf.config.threading.set_intra_op_parallelism_threads(1)
     tf.config.threading.set_inter_op_parallelism_threads(1)
+
+# 2. Tell the code to grab the keys from the "Environment"
+# These names (in quotes) must match exactly what you type into Render later.
+url = os.getenv("SUPABASE_URL")
+key = os.getenv("SUPABASE_KEY")
+
+# 3. Use those variables to start the client
+supabase: Client = create_client(url, key)
 
 # ---------------------------------------------------------------------------
 # Paths — all .npy / .json / .keras files live in the parent folder
@@ -117,7 +127,8 @@ app = FastAPI(
 # Allow the frontend (any origin during dev) to call this API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # tighten in production
+    allow_origins=["https://flood-prediction-app.vercel.app", "http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
