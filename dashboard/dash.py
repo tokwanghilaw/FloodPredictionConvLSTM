@@ -5,7 +5,7 @@ import requests
 import base64
 
 # Replace with your actual Render URL (e.g., https://your-app.onrender.com)
-API_BASE_URL = "http://localhost:8000" 
+API_BASE_URL = "https://floodpredictionconvlstm.onrender.com"
 
 st.set_page_config(page_title="Lake Buhi Flood Dashboard", layout="wide")
 
