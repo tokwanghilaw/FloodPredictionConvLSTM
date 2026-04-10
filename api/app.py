@@ -19,6 +19,9 @@ from __future__ import annotations
 import os
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
+from dotenv import load_dotenv # <--- ADD THIS
+load_dotenv()                 # <--- ADD THIS
+
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
