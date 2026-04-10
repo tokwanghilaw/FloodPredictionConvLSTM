@@ -84,7 +84,7 @@ if 'api_data' in st.session_state:
             name="Flood Depth Overlay"
         ).add_to(m)
         
-        st_folium(m, width=1600, height=1000)
+        st_folium(m, width=1200, height=900)
 
     with col2:
         # Warning Badge
