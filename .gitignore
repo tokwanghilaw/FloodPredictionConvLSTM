@@ -4,11 +4,13 @@ __pycache__/
 *$py.class
 
 # Environments
+thesis_env/
 .env
 .venv
 env/
 venv/
 ENV/
+.venv_new/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
