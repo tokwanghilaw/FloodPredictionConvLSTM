@@ -4,20 +4,18 @@ from streamlit_folium import st_folium
 import requests
 import base64
 
-# --- CONFIGURATION ---
 # Replace with your actual Render URL (e.g., https://your-app.onrender.com)
 API_BASE_URL = "http://localhost:8000" 
 
 st.set_page_config(page_title="Lake Buhi Flood Dashboard", layout="wide")
 
-# --- CUSTOM CSS ---
 st.markdown("""
     <style>
     .metric-container { background-color: #f0f2f6; padding: 15px; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-## --- 1. SIDEBAR: DATA ENTRY ---
+##SIDEBAR
 st.sidebar.header("📥 Input Observations (12-hr)")
 st.sidebar.info("Enter 12 hourly values separated by commas.")
 
@@ -42,7 +40,7 @@ if st.sidebar.button("🚀 Run 6-Hour Forecast"):
     except Exception as e:
         st.error(f"Connection Error: {e}")
 
-## --- 2. MAIN INTERFACE ---
+##MAIN INTERFACE
 st.title("🌊 Lake Buhi Flood Forecast System")
 
 if 'api_data' in st.session_state:
@@ -55,11 +53,10 @@ if 'api_data' in st.session_state:
         format_func=lambda x: f"+{x} Hour{'s' if x > 1 else ''}"
     )
     
-    # Get specific hour result (index is hour_idx - 1)
+    #specific hour result (index is hour_idx - 1)
     current_hour = data['hours'][hour_idx - 1]
     bounds = data['bounds']
     
-    # --- UI COLUMNS ---
     col1, col2 = st.columns([2, 1])
     
     with col1:
