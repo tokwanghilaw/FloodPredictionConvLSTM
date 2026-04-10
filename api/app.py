@@ -196,6 +196,12 @@ class HealthResponse(BaseModel):
     lake_pixels: int
 
 
+class SaveForecastRequest(BaseModel):
+    rainfall: list[float]
+    lake_level: list[float]
+    forecast: dict
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -339,3 +345,15 @@ async def get_lake():
 async def get_thresholds():
     """Return the warning-level thresholds."""
     return _state["cfg"]["norm_params"]["thresholds"]
+
+
+@app.post("/save", tags=["Save"])
+async def save_forecast(req: SaveForecastRequest):
+    """Save a forecast to the database."""
+    data = {
+        "rainfall": req.rainfall,
+        "lake_level": req.lake_level,
+        "forecast": req.forecast
+    }
+    response = supabase.table("saved_forecasts").insert(data).execute()
+    return {"message": "Forecast saved successfully", "id": response.data[0]["id"]}

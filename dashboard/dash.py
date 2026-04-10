@@ -30,6 +30,8 @@ if st.sidebar.button("🚀 Run 6-Hour Forecast"):
         if len(rain_list) != 12 or len(lake_list) != 12:
             st.error("Please ensure exactly 12 values are entered for both fields.")
         else:
+            st.session_state['rain_list'] = rain_list
+            st.session_state['lake_list'] = lake_list
             with st.spinner("API is calculating flood dynamics..."):
                 payload = {"rainfall": rain_list, "lake_level": lake_list}
                 response = requests.post(f"{API_BASE_URL}/predict", json=payload)
@@ -99,6 +101,20 @@ if 'api_data' in st.session_state:
         st.metric("Estimated Area Covered", f"{area_km2:.2f} km²")
         
         st.progress(current_hour['flooded_land_pct'] / 100, text=f"Land Submerged: {current_hour['flooded_land_pct']}%")
+
+        # Save Forecast Button
+        if st.button("💾 Save Forecast"):
+            try:
+                payload = {
+                    "rainfall": st.session_state['rain_list'],
+                    "lake_level": st.session_state['lake_list'],
+                    "forecast": data
+                }
+                response = requests.post(f"{API_BASE_URL}/save", json=payload)
+                response.raise_for_status()
+                st.success("Forecast saved to database!")
+            except Exception as e:
+                st.error(f"Failed to save forecast: {e}")
 
 else:
     st.info("👈 Enter the 12-hour rainfall and lake level data in the sidebar and click 'Run Forecast' to begin.")
