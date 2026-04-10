@@ -18,7 +18,7 @@ ENV/
 # Large data files (CSV, weights, models)
 *.csv
 *.h5
-*.keras
+#*.keras
 *.pt
 *.pth
 
