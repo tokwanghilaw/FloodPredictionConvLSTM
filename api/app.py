@@ -357,3 +357,10 @@ async def save_forecast(req: SaveForecastRequest):
     }
     response = supabase.table("saved_forecasts").insert(data).execute()
     return {"message": "Forecast saved successfully", "id": response.data[0]["id"]}
+
+
+@app.get("/saved", tags=["Save"])
+async def list_saved_forecasts():
+    """Return saved forecasts from the database."""
+    response = supabase.table("saved_forecasts").select("*").order("created_at", desc=True).execute()
+    return response.data
