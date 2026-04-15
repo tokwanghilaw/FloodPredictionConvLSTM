@@ -48,11 +48,9 @@ if st.sidebar.button("🚀 Run 6-Hour Forecast"):
 st.title("Lake Buhi Flood Forecast System")
 
 st.warning("""
-**⚠️ Decision Support Tool Disclaimer**
+**⚠️ Disclaimer**
 
-This flood prediction system is a **decision-support tool** designed to assist in flood risk assessment and planning. It is **not** a definitive forecast and should not be used as the sole basis for emergency response or evacuation decisions.
-
-Use this tool in conjunction with other flood monitoring resources and professional judgment.
+This flood prediction system is a **decision-support tool** designed to assist in flood risk assessment and planning. It is **not** a definitive forecast and should not be used as the sole basis for emergency response or evacuation decisions. Use this tool in conjunction with other flood monitoring resources and professional judgment.
 """)
 
 view_mode = st.sidebar.radio("Choose View", ["Live Forecast", "Saved Forecasts"])
