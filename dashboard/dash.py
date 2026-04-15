@@ -47,6 +47,14 @@ if st.sidebar.button("🚀 Run 6-Hour Forecast"):
 ##MAIN INTERFACE
 st.title("Lake Buhi Flood Forecast System")
 
+st.warning("""
+**⚠️ Decision Support Tool Disclaimer**
+
+This flood prediction system is a **decision-support tool** designed to assist in flood risk assessment and planning. It is **not** a definitive forecast and should not be used as the sole basis for emergency response or evacuation decisions.
+
+Use this tool in conjunction with other flood monitoring resources and professional judgment.
+""")
+
 view_mode = st.sidebar.radio("Choose View", ["Live Forecast", "Saved Forecasts"])
 
 if view_mode == "Saved Forecasts":
@@ -139,6 +147,7 @@ if view_mode == "Saved Forecasts":
 
                 area_km2 = current_hour['flooded_pixels'] * (0.03 * 0.03)
                 st.metric("Estimated Area Covered", f"{area_km2:.2f} km²")
+                st.metric("Map Resolution", "30m per pixel")
                 st.progress(current_hour['flooded_land_pct'] / 100, text=f"Land Submerged: {current_hour['flooded_land_pct']}%")
         else:
             st.warning("Saved forecast data is missing required display fields.")
@@ -224,6 +233,7 @@ else:
             # Note: 1 pixel is approx 0.0009 km2 (30m x 30m). Adjust if your res is different.
             area_km2 = current_hour['flooded_pixels'] * (0.03 * 0.03) 
             st.metric("Estimated Area Covered", f"{area_km2:.2f} km²")
+            st.metric("Map Resolution", "30m per pixel")
             
             st.progress(current_hour['flooded_land_pct'] / 100, text=f"Land Submerged: {current_hour['flooded_land_pct']}%")
 
