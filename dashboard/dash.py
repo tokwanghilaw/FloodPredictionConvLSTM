@@ -3,6 +3,9 @@ import folium
 from streamlit_folium import st_folium
 import requests
 import base64
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from io import BytesIO
 
 API_BASE_URL = "https://floodpredictionconvlstm.onrender.com"
 
@@ -15,7 +18,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 ##SIDEBAR
-st.sidebar.header("📥 Input Observations (12-hr)")
+st.sidebar.header("Input Observations (12-hr)")
 st.sidebar.info("Enter 12 hourly values separated by commas.")
 
 rain_str = st.sidebar.text_area("Rainfall (mm)", "0, 0.5, 2, 5, 10, 15, 25, 35, 45, 40, 30, 20")
@@ -42,7 +45,7 @@ if st.sidebar.button("🚀 Run 6-Hour Forecast"):
         st.error(f"Connection Error: {e}")
 
 ##MAIN INTERFACE
-st.title("🌊 Lake Buhi Flood Forecast System")
+st.title("Lake Buhi Flood Forecast System")
 
 view_mode = st.sidebar.radio("Choose View", ["Live Forecast", "Saved Forecasts"])
 
@@ -81,6 +84,9 @@ if view_mode == "Saved Forecasts":
 
             current_hour = forecast['hours'][hour_idx - 1]
 
+            # Compute global max depth for colorbar
+            max_depth = max(h['max_depth_m'] for h in forecast['hours'])
+
             col1, col2 = st.columns([2, 1])
             with col1:
                 center_lat = (bounds['south'] + bounds['north']) / 2
@@ -102,6 +108,26 @@ if view_mode == "Saved Forecasts":
                     opacity=0.7,
                     name="Flood Depth Overlay"
                 ).add_to(m)
+
+                # Add colorbar legend if max_depth > 0
+                if max_depth > 0:
+                    fig, ax = plt.subplots(figsize=(1, 6))
+                    cmap = mpl.cm.plasma
+                    norm = mpl.colors.Normalize(vmin=0, vmax=max_depth)
+                    cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='vertical')
+                    cb.set_label('Flood Depth (m)', fontsize=10)
+                    buf = BytesIO()
+                    fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+                    buf.seek(0)
+                    colorbar_b64 = base64.b64encode(buf.read()).decode('utf-8')
+                    plt.close(fig)
+
+                    html = f'''
+                    <div style="position: fixed; bottom: 50px; left: 50px; width: 120px; height: 300px; background-color: white; border:2px solid grey; z-index:9999; padding: 5px;">
+                    <img src="data:image/png;base64,{colorbar_b64}" style="width:100%; height:100%;">
+                    </div>
+                    '''
+                    m.get_root().html.add_child(folium.Element(html))
 
                 st_folium(m, width=1200, height=900)
 
@@ -134,6 +160,9 @@ else:
         current_hour = data['hours'][hour_idx - 1]
         bounds = data['bounds']
         
+        # Compute global max depth for colorbar
+        max_depth = max(h['max_depth_m'] for h in data['hours'])
+        
         col1, col2 = st.columns([2, 1])
         
         with col1:
@@ -159,6 +188,26 @@ else:
                 opacity=0.7,
                 name="Flood Depth Overlay"
             ).add_to(m)
+            
+            # Add colorbar legend if max_depth > 0
+            if max_depth > 0:
+                fig, ax = plt.subplots(figsize=(1, 6))
+                cmap = mpl.cm.plasma
+                norm = mpl.colors.Normalize(vmin=0, vmax=max_depth)
+                cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='vertical')
+                cb.set_label('Flood Depth (m)', fontsize=10)
+                buf = BytesIO()
+                fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+                buf.seek(0)
+                colorbar_b64 = base64.b64encode(buf.read()).decode('utf-8')
+                plt.close(fig)
+
+                html = f'''
+                <div style="position: fixed; bottom: 50px; left: 50px; width: 120px; height: 300px; background-color: white; border:2px solid grey; z-index:9999; padding: 5px;">
+                <img src="data:image/png;base64,{colorbar_b64}" style="width:100%; height:100%;">
+                </div>
+                '''
+                m.get_root().html.add_child(folium.Element(html))
             
             st_folium(m, width=1200, height=900)
 
