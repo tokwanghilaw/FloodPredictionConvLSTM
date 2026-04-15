@@ -111,7 +111,7 @@ if view_mode == "Saved Forecasts":
 
                 # Add colorbar legend if max_depth > 0
                 if max_depth > 0:
-                    fig, ax = plt.subplots(figsize=(1, 6))
+                    fig, ax = plt.subplots(figsize=(0.7, 5.5))
                     cmap = mpl.cm.plasma
                     norm = mpl.colors.Normalize(vmin=0, vmax=max_depth)
                     cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='vertical')
@@ -123,13 +123,13 @@ if view_mode == "Saved Forecasts":
                     plt.close(fig)
 
                     html = f'''
-                    <div style="position: fixed; bottom: 50px; left: 50px; width: 120px; height: 300px; background-color: white; border:2px solid grey; z-index:9999; padding: 5px;">
-                    <img src="data:image/png;base64,{colorbar_b64}" style="width:100%; height:100%;">
+                    <div style="position: fixed; bottom: 50px; left: 50px; width: 90px; height: 260px; background-color: white; border:2px solid grey; z-index:9999; padding: 5px;">
+                    <img src="data:image/png;base64,{colorbar_b64}" style="width:100%; height:100%; object-fit: contain;">
                     </div>
                     '''
                     m.get_root().html.add_child(folium.Element(html))
 
-                st_folium(m, width=1200, height=900)
+                st_folium(m, width=820, height=560)
 
             with col2:
                 st.markdown(f"### Status: <span style='color:{current_hour['warning_color']}'>{current_hour['warning_level']}</span>", unsafe_allow_html=True)
@@ -203,13 +203,13 @@ else:
                 plt.close(fig)
 
                 html = f'''
-                <div style="position: fixed; bottom: 50px; left: 50px; width: 120px; height: 300px; background-color: white; border:2px solid grey; z-index:9999; padding: 5px;">
-                <img src="data:image/png;base64,{colorbar_b64}" style="width:100%; height:100%;">
+                <div style="position: fixed; bottom: 50px; left: 50px; width: 90px; height: 260px; background-color: white; border:2px solid grey; z-index:9999; padding: 5px;">
+                <img src="data:image/png;base64,{colorbar_b64}" style="width:100%; height:100%; object-fit: contain;">
                 </div>
                 '''
                 m.get_root().html.add_child(folium.Element(html))
             
-            st_folium(m, width=1200, height=900)
+            st_folium(m, width=820, height=560)
 
         with col2:
             # Warning Badge
