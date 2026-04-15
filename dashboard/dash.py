@@ -137,6 +137,8 @@ if view_mode == "Saved Forecasts":
 
                 st_folium(m, width=820, height=560)
 
+                st.caption("Map Resolution: 30m per pixel")
+
             with col2:
                 st.markdown(f"### Status: <span style='color:{current_hour['warning_color']}'>{current_hour['warning_level']}</span>", unsafe_allow_html=True)
                 st.metric("Predicted Lake Level", f"{current_hour['predicted_level_m']} m")
@@ -145,7 +147,6 @@ if view_mode == "Saved Forecasts":
 
                 area_km2 = current_hour['flooded_pixels'] * (0.03 * 0.03)
                 st.metric("Estimated Area Covered", f"{area_km2:.2f} km²")
-                st.metric("Map Resolution", "30m per pixel")
                 st.progress(current_hour['flooded_land_pct'] / 100, text=f"Land Submerged: {current_hour['flooded_land_pct']}%")
         else:
             st.warning("Saved forecast data is missing required display fields.")
@@ -218,6 +219,8 @@ else:
             
             st_folium(m, width=820, height=560)
 
+            st.caption("Map Resolution: 30m per pixel")
+
         with col2:
             # Warning Badge
             st.markdown(f"### Status: <span style='color:{current_hour['warning_color']}'>{current_hour['warning_level']}</span>", unsafe_allow_html=True)
@@ -231,7 +234,6 @@ else:
             # Note: 1 pixel is approx 0.0009 km2 (30m x 30m). Adjust if your res is different.
             area_km2 = current_hour['flooded_pixels'] * (0.03 * 0.03) 
             st.metric("Estimated Area Covered", f"{area_km2:.2f} km²")
-            st.metric("Map Resolution", "30m per pixel")
             
             st.progress(current_hour['flooded_land_pct'] / 100, text=f"Land Submerged: {current_hour['flooded_land_pct']}%")
 
