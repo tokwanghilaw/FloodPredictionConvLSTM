@@ -68,10 +68,11 @@ key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 # ---------------------------------------------------------------------------
-# Paths — all .npy / .json / .keras files live in the parent folder
+# Paths — all .npy / .json / .keras files live in the model folder
 # ---------------------------------------------------------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent  # "ConvLSTM Model v3/"
-MODEL_PATH = BASE_DIR / "best_model.keras"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent  # project root
+MODEL_DIR = PROJECT_ROOT / "model"  # model data folder
+MODEL_PATH = MODEL_DIR / "best_model.keras"
 
 # ---------------------------------------------------------------------------
 # Global singletons (loaded once at startup)
@@ -84,12 +85,12 @@ async def lifespan(app: FastAPI):
     """Load model + static arrays once when the server starts."""
     print("Loading model and static data...")
 
-    cfg = load_config(metadata_dir=BASE_DIR)
-    model = load_model(model_path=MODEL_PATH, metadata_dir=BASE_DIR)
+    cfg = load_config(metadata_dir=MODEL_DIR)
+    model = load_model(model_path=MODEL_PATH, metadata_dir=MODEL_DIR)
 
-    dem = np.load(BASE_DIR / "dem_small.npy")
-    dem_norm = np.load(BASE_DIR / "dem_small_norm.npy")
-    lake_mask_raw = np.load(BASE_DIR / "lake_small.npy")
+    dem = np.load(MODEL_DIR / "dem_small.npy")
+    dem_norm = np.load(MODEL_DIR / "dem_small_norm.npy")
+    lake_mask_raw = np.load(MODEL_DIR / "lake_small.npy")
     lake_mask = clean_lake_mask(lake_mask_raw)
 
     _state["model"] = model
